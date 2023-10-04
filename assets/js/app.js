@@ -15,6 +15,15 @@
         puntosHTML = document.querySelectorAll('small'),
         mensaje = document.querySelector('#mensaje');
 
+    const crearBaraja = () => {
+        const baraja = [];
+        for (let i = 2; i <= 10; i++) {
+            tipos.forEach(tipo => baraja.push(i + tipo));
+        }
+        tipos.forEach(tipo => especiales.forEach(esp => baraja.push(esp + tipo)));
+        return _.shuffle(baraja);
+    }
+
     const inicializarJuego = (numJugadores = 2) => {
         baraja = crearBaraja();
         puntosJugadores = Array(numJugadores).fill(0);
@@ -23,15 +32,6 @@
         btnPedir.disabled = false;
         btnDetener.disabled = false;
         mensaje.innerText = '';
-    }
-
-    const crearBaraja = () => {
-        const baraja = [];
-        for (let i = 2; i <= 10; i++) {
-            tipos.forEach(tipo => baraja.push(i + tipo));
-        }
-        tipos.forEach(tipo => especiales.forEach(esp => baraja.push(esp + tipo)));
-        return _.shuffle(baraja);
     }
 
     const pedirCarta = () => {
@@ -70,7 +70,10 @@
                 crearCarta(carta, puntosJugadores.length - 1);
 
                 if (puntosMinimos > 21 || puntosComputadora > puntosMinimos) {
-                    generarMensajes(puntosMinimos, puntosComputadora);
+                    contarPuntos(puntosMinimos, puntosComputadora);
+                    setTimeout(() => {
+                        mostrarMensaje(puntosMinimos, puntosComputadora);
+                    }, 500);
                     return;
                 }
                 await esperar(intervalo);
@@ -106,39 +109,42 @@
     });
 
     //Conteo de Puntuaciones
-    function generarMensajes(puntosMinimos, puntosComputadora) {
-
-        let empateCount = parseInt(sessionStorage.getItem('empateCount')) || 0;
-        let perdisteCount = parseInt(sessionStorage.getItem('perdisteCount')) || 0;
-        let ganasteCount = parseInt(sessionStorage.getItem('ganasteCount')) || 0;
-
-
+    function contarPuntos(puntosMinimos, puntosComputadora) {
+        let empatecontador = parseInt(sessionStorage.getItem('empatecontador')) || 0;
+        let perdistecontador = parseInt(sessionStorage.getItem('perdistecontador')) || 0;
+        let ganastecontador = parseInt(sessionStorage.getItem('ganastecontador')) || 0;
+    
         if (puntosComputadora === puntosMinimos) {
-            empateCount++;
-            sessionStorage.setItem('empateCount', empateCount);
-            mensaje.innerText = (`EMPATE!! \n Computadora: ${perdisteCount} Jugador: ${ganasteCount}`);
-            mensaje.classList.add('background');
-
-        }else if (puntosMinimos > 21) {
-            perdisteCount++;
-            sessionStorage.setItem('perdisteCount', perdisteCount);
-            mensaje.innerText = (`PERDISTE!! :( \n Computadora: ${perdisteCount} Jugador: ${ganasteCount} `);
-            mensaje.classList.add('background');
-
-
-        }else if (puntosComputadora > 21 || puntosMinimos === 21){
-            ganasteCount++;
-            sessionStorage.setItem('ganasteCount', ganasteCount);
-            mensaje.innerText = (`¡¡GANASTE¡¡ :) \n Computadora: ${perdisteCount} Jugador: ${ganasteCount}`);
-            mensaje.classList.add('background');
-
-
-        }else{
-            perdisteCount++;
-            mensaje.innerText = (`¡¡PERDISTE¡¡ :( \n Computadora: ${perdisteCount} Jugador: ${ganasteCount}`);
-            mensaje.classList.add('background'); 
+            empatecontador++;
+            sessionStorage.setItem('empatecontador', empatecontador);
+        } else if (puntosMinimos > 21) {
+            perdistecontador++;
+            sessionStorage.setItem('perdistecontador', perdistecontador);
+        } else if (puntosComputadora > 21 || puntosMinimos === 21) {
+            ganastecontador++;
+            sessionStorage.setItem('ganastecontador', ganastecontador);
+        } else {
+            perdistecontador++;
+            sessionStorage.setItem('perdistecontador', perdistecontador);
         }
     }
+
+    function mostrarMensaje(puntosMinimos, puntosComputadora) {
+        let empatecontador = parseInt(sessionStorage.getItem('empatecontador')) || 0;
+        let perdistecontador = parseInt(sessionStorage.getItem('perdistecontador')) || 0;
+        let ganastecontador = parseInt(sessionStorage.getItem('ganastecontador')) || 0;
+    
+        if (puntosComputadora === puntosMinimos) {
+            Swal.fire('EMPATE!! &#128529;', `Computadora: ${perdistecontador} - Jugador: ${ganastecontador}`, 'info');
+        } else if (puntosMinimos > 21) {
+            Swal.fire('PERDISTE!! &#128557;', `Computadora: ${perdistecontador} - Jugador: ${ganastecontador}`, 'error');
+        } else if (puntosComputadora > 21 || puntosMinimos === 21) {
+            Swal.fire('¡¡GANASTE¡¡ &#127881;', `Computadora: ${perdistecontador} - Jugador: ${ganastecontador}`, 'success');
+        } else {
+            Swal.fire('¡¡PERDISTE¡¡ &#128557;', `Computadora: ${perdistecontador} - Jugador: ${ganastecontador}`, 'error');
+        }
+    }
+    
 
 })();
 
